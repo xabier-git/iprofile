@@ -1,0 +1,12 @@
+# k8s/mongo-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: iprofiledb
+spec:
+  selector:
+    app: iprofiledb
+  ports:
+    - port: 27017
+      targetPort: 27017
+  type: ClusterIP

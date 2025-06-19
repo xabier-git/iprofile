@@ -1,0 +1,12 @@
+# k8s/frontend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: iprofile-frontend
+spec:
+  selector:
+    app: iprofile-frontend
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

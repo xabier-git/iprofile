@@ -1,0 +1,21 @@
+# k8s/frontend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iprofile-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iprofile-frontend
+  template:
+    metadata:
+      labels:
+        app: iprofile-frontend
+    spec:
+      containers:
+        - name: iprofile-frontend
+          image: iprofile-frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80

@@ -7,6 +7,7 @@
 Thumbs.db
 .env
 .env.*
+*Identifier
 
 # === Node.js backend (iprofile-backend/) ===
 iprofile-backend/node_modules/

@@ -1,0 +1,12 @@
+# k8s/backend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: iprofile-backend
+spec:
+  selector:
+    app: iprofile-backend
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: ClusterIP

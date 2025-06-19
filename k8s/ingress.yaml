@@ -1,0 +1,32 @@
+# k8s/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: iprofile-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - path: /iprofile/api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: iprofile-backend
+                port:
+                  number: 3000
+          - path: /iprofile
+            pathType: Exact
+            backend:
+              service:
+                name: iprofile-frontend
+                port:
+                  number: 80
+          - path: /iprofile/
+            pathType: Prefix
+            backend:
+              service:
+                name: iprofile-frontend
+                port:
+                  number: 80

@@ -1,0 +1,24 @@
+# k8s/backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iprofile-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iprofile-backend
+  template:
+    metadata:
+      labels:
+        app: iprofile-backend
+    spec:
+      containers:
+        - name: iprofile-backend
+          image: iprofile-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGO_URL
+              value: "mongodb://admin:adminpassword@iprofiledb:27017"
