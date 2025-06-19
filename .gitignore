@@ -1,0 +1,40 @@
+# === Global ===
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.env
+.env.*
+
+# === Node.js backend (iprofile-backend/) ===
+iprofile-backend/node_modules/
+iprofile-backend/.env
+iprofile-backend/dist/
+iprofile-backend/logs/
+
+# === Angular frontend (iprofile-frontend/) ===
+iprofile-frontend/node_modules/
+iprofile-frontend/dist/
+iprofile-frontend/.angular/
+iprofile-frontend/.env
+
+# === Docker ===
+**/.dockerignore
+# NO EXCLUIMOS Dockerfile
+
+# === Kubernetes manifests (opcional, descomenta si no quieres subirlos)
+#k8s/*.yaml
+#k8s/*.yml
+
+# === IDEs y editores ===
+.vscode/
+.idea/
+*.code-workspace
+
+# === OS ===
+*.bak
+*.orig
+*~
+
