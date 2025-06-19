@@ -20,14 +20,6 @@ iprofile-frontend/dist/
 iprofile-frontend/.angular/
 iprofile-frontend/.env
 
-# === Docker ===
-**/.dockerignore
-# NO EXCLUIMOS Dockerfile
-
-# === Kubernetes manifests (opcional, descomenta si no quieres subirlos)
-#k8s/*.yaml
-#k8s/*.yml
-
 # === IDEs y editores ===
 .vscode/
 .idea/
