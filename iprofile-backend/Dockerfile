@@ -1,9 +1,9 @@
 FROM node:18
 WORKDIR /app
 COPY . .
-RUN apt-get update && \
-    apt-get install -y net-tools && \
-    apt-get clean
+#RUN apt-get update && \
+#    apt-get install -y net-tools && \
+#    apt-get clean
     
 RUN npm install 
 EXPOSE 3000

@@ -2,11 +2,12 @@
 FROM node:18 AS builder
 WORKDIR /app
 COPY . .
-RUN apt-get update && \
-    apt-get install -y net-tools && \
-    apt-get clean
+#RUN apt-get update && \
+ #   apt-get install -y net-tools && \
+  #  apt-get clean
     
-RUN npm install && npm run build
+#RUN npm install && npm run build
+RUN npm ci && npm run build
 
 # Etapa de producción
 FROM nginx:alpine
