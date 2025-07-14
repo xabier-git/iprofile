@@ -1,0 +1,133 @@
+Estructura recomendada
+
+Crea un directorio para Jenkins:
+
+mkdir jenkins-docker && cd jenkins-docker
+
+
+---
+
+📄 1. Crea el archivo docker-compose.yml
+
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # Web interface
+      - "50000:50000" # Jenkins agents
+    volumes:
+      - jenkins_home:/var/jenkins_home
+
+volumes:
+  jenkins_home:
+
+
+---
+
+📄 2. (Opcional) Permitir que Jenkins use Docker (build jobs dentro del host)
+
+Si quieres que Jenkins dentro del contenedor pueda ejecutar comandos Docker (como docker build), agrega:
+
+user: root
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+Y asegúrate de tener Docker instalado en el host y que Jenkins corra como root (o con permisos).
+
+
+---
+
+▶ 3. Inicia Jenkins
+
+Desde el directorio donde creaste el docker-compose.yml:
+
+docker compose up -d
+
+Esto:
+
+Descargará la imagen jenkins/jenkins:lts si no la tienes.
+
+Levantará el contenedor con puertos 8080 y 50000 disponibles.
+
+Creará un volumen persistente llamado jenkins_home.
+
+
+
+---
+
+🔑 4. Obtener la clave de desbloqueo
+
+Una vez iniciado, ejecuta:
+
+docker exec -it jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+
+
+---
+
+🌐 5. Accede desde tu navegador:
+
+http://localhost:8080
+
+Y pega el token que copiaste para continuar con la instalación del admin y los plugins.
+
+
+---
+
+🧹 6. Detener y eliminar
+
+Cuando quieras apagar Jenkins:
+
+docker compose down
+
+Si quieres eliminar también los datos persistentes:
+
+docker compose down -v
+
+
+---
+
+¿Quieres que te genere un Dockerfile o configures un pipeline simple como primer trabajo?
+
+
+------
+En un Jenkinsfile, una etapa que descarga fuentes de Git generalmente se define utilizando el bloque checkout dentro de la etapa stage. Este bloque especifica la URL del repositorio Git, la rama a clonar y, opcionalmente, credenciales si el repositorio es privado. El resultado es que Jenkins descarga la última versión del código del repositorio especificado en el espacio de trabajo del agente, listo para ser utilizado en etapas posteriores. 
+Ejemplo de una etapa de checkout en un Jenkinsfile: 
+Código
+
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                           branches: [[name: '*/main']],
+                           doGenerateSubmoduleConfigurations: false,
+                           extensions: [],
+                           userRemoteConfigs: [[credentialsId: 'your-credentials-id',
+                                                url: 'https://github.com/your-username/your-repository.git']]
+                ])
+            }
+        }
+        // ... otras etapas ...
+    }
+}
+Explicación de la etapa de checkout:
+stage('Checkout'): Define el nombre de la etapa como "Checkout".
+steps: Contiene la lista de pasos a ejecutar dentro de la etapa.
+checkout: Es la función que realiza la descarga del repositorio.
+[$class: 'GitSCM']: Especifica que se utilizará el complemento de Git para la descarga.
+branches: [[name: '*/main']]: Indica que se descargará la rama main del repositorio. Puedes cambiar esto a otra rama si es necesario.
+userRemoteConfigs: Especifica la configuración del repositorio remoto.
+credentialsId: 'your-credentials-id': Si el repositorio es privado, se especifica el ID de las credenciales almacenadas en Jenkins para acceder al repositorio. Reemplaza 'your-credentials-id' con el ID real de tus credenciales.
+url: 'https://github.com/your-username/your-repository.git': Indica la URL del repositorio Git. Reemplaza https://github.com/your-username/your-repository.git con la URL correcta de tu repositorio. 
+En resumen, esta etapa realiza las siguientes acciones:
+Descarga: la última versión del código del repositorio Git especificado.
+Clona: el código en el espacio de trabajo del agente Jenkins, listo para ser utilizado en las etapas siguientes.
+Verifica: que las credenciales sean correctas (si son necesarias) y que el repositorio sea accesible.
+Prepara: el entorno para las siguientes etapas del pipeline. 
+Es importante recordar que la etapa de checkout es el primer paso en muchos pipelines de Jenkins, ya que permite a Jenkins acceder al código fuente que se va a construir, probar e implementar. 

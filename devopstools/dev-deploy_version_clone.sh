@@ -41,21 +41,18 @@ if ! git ls-remote "$REPO_URL" &> /dev/null; then
     exit 1
 fi
 
-echo "✅ Actualizando rama 'evolucion'..."
-git fetch origin
-git checkout evolucion
-git pull origin evolucion
 
-if [ ! -d "$BACK_DIR" ]; then
-    echo "❌ ERROR: El proyecto backend no existe en $BACK_DIR."
-    exit 1
+if [ ! -d "$REPO_URL" ] ; then
+    echo "🔄 No se encontro el repo. Clonando repositorio desde GitHub rama 'evolucion'..."
+    git clone --branch evolucion "$REPO_URL" "$REPO_DIR"
+    cd "$REPO_DIR"
+else
+    echo "✅ Proyectos encontrados. Actualizando desde rama 'evolucion'..."
+    cd "$REPO_DIR"
+    git fetch origin
+    git checkout evolucion
+    git pull origin evolucion
 fi
-
-if [ ! -d "$FRONT_DIR" ]; then
-    echo "❌ ERROR: El proyecto frontend no existe en $FRONT_DIR."
-    exit 1
-fi  
-
 
 # Asegurarse de estar en la raíz del proyecto
 cd "$(dirname "$0")"

@@ -35,15 +35,40 @@ pipeline {
             }
         }
 
-        stage('Checkout') {
+        stage('Clonar o actualizar repositorio') {
             steps {
-                checkout([$class: 'GitSCM',
-                           branches: [[name: '*/evolucion']],
-                           doGenerateSubmoduleConfigurations: false,
-                           extensions: [],
-                           userRemoteConfigs: [[credentialsId: 'xabier-git',
-                                                url: 'https://github.com/xabier-git/iprofile.git']]
-                ])
+                dir("${REPO_DIR}") {
+                    script {
+                        def exists = fileExists("${FRONT_DIR}") && fileExists("${BACK_DIR}")
+                        if (!exists) {
+                            echo "🔄 Clonando repositorio..."
+                            dir("..") {
+                                sh "git clone --branch evolucion ${REPO_URL} ${REPO_DIR}"
+                            }
+                        } else {
+                            echo "✅ Proyectos encontrados. Actualizando..."
+                            sh """
+                                git fetch origin
+                                git checkout evolucion
+                                git pull origin evolucion
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Instalar dependencias backend') {
+            steps {
+                dir("${REPO_DIR}/${BACK_DIR}") {
+                    script {
+                        if (!fileExists('node_modules')) {
+                            sh 'npm install'
+                        } else {
+                            echo "✅ node_modules ya existe en backend."
+                        }
+                    }
+                }
             }
         }
 
