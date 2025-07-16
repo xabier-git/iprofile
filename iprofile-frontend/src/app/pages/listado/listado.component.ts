@@ -3,13 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // Para ngModel
+import { Profile } from '../../models/profile.model'; // <-- Nueva importación
 
-interface Profile {
-  nombre: string;
-  nickname: string;
-  tieneNovio: boolean;
-  equipoActual: string;
-}
 
 @Component({
   selector: 'app-listado',

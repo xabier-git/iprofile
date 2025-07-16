@@ -1,0 +1,123 @@
+pipeline {
+    agent any
+
+    environment {
+        REPO_URL = 'https://github.com/xabier-git/iprofile.git'
+        REPO_DIR = 'iprofile'
+        FRONT_DIR = 'iprofile-frontend'
+        BACK_DIR = 'iprofile-backend'
+        K8S_DIR = 'k8s'
+
+        BACKEND_IMAGE = 'iprofile-backend:latest'
+        FRONTEND_IMAGE = 'iprofile-frontend:latest'
+
+        REQUIRED_NODE_MAJOR = 18
+        MAX_NODE_MAJOR_SUPPORTED = 20
+    }
+
+    stages {
+        stage('Verificar Node.js') {
+            steps {
+                script {
+                    def nodeVersion = sh(script: "node -v | sed 's/v//'", returnStdout: true).trim()
+                    def nodeMajor = nodeVersion.tokenize('.')[0].toInteger()
+
+                    echo "🧪 Node.js detectado: v${nodeVersion}"
+
+                    if (nodeMajor % 2 != 0) {
+                        echo "⚠️ Estás usando una versión no-LTS (${nodeVersion})"
+                    }
+
+                    if (nodeMajor < REQUIRED_NODE_MAJOR.toInteger() || nodeMajor > MAX_NODE_MAJOR_SUPPORTED.toInteger()) {
+                        error("❌ Node.js v${nodeVersion} no es compatible. Usa v18–v20.")
+                    }
+                }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                           branches: [[name: '*/evolucion']],
+                           doGenerateSubmoduleConfigurations: false,
+                           extensions: [],
+                           userRemoteConfigs: [[credentialsId: 'xabier-git',
+                                                url: 'https://github.com/xabier-git/iprofile.git']]
+                ])
+            }
+        }
+
+        stage('Construir imagen backend') {
+            steps {
+                dir("${REPO_DIR}") {
+                    sh "docker build -t ${BACKEND_IMAGE} ${BACK_DIR}"
+                }
+            }
+        }
+
+        stage('Instalar dependencias frontend') {
+            steps {
+                dir("${REPO_DIR}/${FRONT_DIR}") {
+                    script {
+                        if (!fileExists('node_modules')) {
+                            sh 'npm install'
+                        } else {
+                            echo "✅ node_modules ya existe en frontend."
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Construir frontend Angular') {
+            steps {
+                dir("${REPO_DIR}/${FRONT_DIR}") {
+                    sh 'npx ng build'
+                }
+            }
+        }
+
+        stage('Construir imagen frontend') {
+            steps {
+                dir("${REPO_DIR}") {
+                    sh "docker build -t ${FRONTEND_IMAGE} ${FRONT_DIR}"
+                }
+            }
+        }
+
+        stage('Desplegar en Kubernetes') {
+            steps {
+                dir("${REPO_DIR}") {
+                    sh """
+                        kubectl delete -f ${K8S_DIR}/ingress.yaml --ignore-not-found
+                        kubectl delete -f ${K8S_DIR}/frontend-deployment.yaml --ignore-not-found
+                        kubectl delete -f ${K8S_DIR}/frontend-service.yaml --ignore-not-found
+                        kubectl delete -f ${K8S_DIR}/backend-deployment.yaml --ignore-not-found
+                        kubectl delete -f ${K8S_DIR}/backend-service.yaml --ignore-not-found
+                        # kubectl delete -f ${K8S_DIR}/mongo-deployment.yaml --ignore-not-found
+                        # kubectl delete -f ${K8S_DIR}/mongo-service.yaml --ignore-not-found
+
+                        kubectl apply -f ${K8S_DIR}/mongo-pvc.yaml
+                        kubectl apply -f ${K8S_DIR}/mongo-deployment.yaml
+                        kubectl apply -f ${K8S_DIR}/mongo-service.yaml
+
+                        kubectl apply -f ${K8S_DIR}/backend-deployment.yaml
+                        kubectl apply -f ${K8S_DIR}/backend-service.yaml
+                        kubectl apply -f ${K8S_DIR}/frontend-deployment.yaml
+                        kubectl apply -f ${K8S_DIR}/frontend-service.yaml
+                        kubectl apply -f ${K8S_DIR}/ingress.yaml
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Despliegue completo y actualizado."
+        }
+        failure {
+            echo "❌ El pipeline falló. Revisa los logs."
+        }
+    }
+}

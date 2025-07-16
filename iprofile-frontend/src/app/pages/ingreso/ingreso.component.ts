@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
+import { Profile } from '../../models/profile.model'; // <-- Añade esta línea
 
 @Component({
   selector: 'app-ingreso',
@@ -11,8 +12,9 @@ import { Router } from '@angular/router';
   styleUrls: ['./ingreso.component.css']
 })
 export class IngresoComponent {
- 
-  profile: any = {};
+  
+ // Usa la interfaz en el componente:
+profile: Partial<Profile> = {}; // `Partial` permite propiedades opcionales durante el ingreso
 
   constructor (private apiService: ApiService, private router: Router )   {
     console.log("IngresoComponent initialized");

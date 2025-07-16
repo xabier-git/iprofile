@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { Profile } from '../models/profile.model'; // <-- Añade esta línea
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
-  getProfilesList(): Observable<any[]> {
+  getProfilesList(): Observable<Profile[]> {
     console.log("getProfilesList()");
     console.log("calling API with URL:", this.apiUrl+"/"+this.listUri);
     try{

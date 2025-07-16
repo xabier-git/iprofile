@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/xabier-git/iprofile.git'
-        REPO_DIR = 'iprofile'
+        REPO_DIR = '.'
         FRONT_DIR = 'iprofile-frontend'
         BACK_DIR = 'iprofile-backend'
         K8S_DIR = 'k8s'
@@ -46,11 +46,24 @@ pipeline {
                 ])
             }
         }
-
-        stage('Construir imagen backend') {
+        
+        stage('Debug: Estructura del repositorio') {
             steps {
-                dir("${REPO_DIR}") {
-                    sh "docker build -t ${BACKEND_IMAGE} ${BACK_DIR}"
+                sh """
+                    echo "Contenido del workspace:"
+                    pwd
+                    ls -la
+                    echo "Contenido de iprofile:"
+                    ls -la iprofile || true
+                """
+            }
+        }
+
+       // Y luego en las etapas:
+        stage('Construir imagen backend') {
+            dir("${REPO_DIR}") {
+                steps {
+                    sh "docker build -t ${BACKEND_IMAGE} -f ${BACK_DIR}/Dockerfile ${BACK_DIR}"
                 }
             }
         }
@@ -84,7 +97,16 @@ pipeline {
                 }
             }
         }
-
+        
+        stage('Verificar kubectl') {
+            steps {
+                script {
+                    def kubectlVersion = sh(script: "kubectl version --client", returnStdout: true).trim()
+                    echo "🔎 kubectl detectado: ${kubectlVersion}"
+                }
+            }
+        }
+        
         stage('Desplegar en Kubernetes') {
             steps {
                 dir("${REPO_DIR}") {

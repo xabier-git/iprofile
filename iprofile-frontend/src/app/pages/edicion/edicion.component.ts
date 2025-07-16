@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
+import { Profile } from '../../models/profile.model'; // <-- Nueva importación
 
 @Component({
   selector: 'app-edicion',
@@ -12,7 +13,8 @@ import { Router } from '@angular/router';
   imports: [CommonModule, FormsModule]
 })
 export class EdicionComponent {
-  profile: any = null;
+  // Usa la interfaz en el componente:
+  profile: Profile | null = null;
 
   constructor(private apiService: ApiService, private router: Router) {
     const nav = this.router.getCurrentNavigation();
