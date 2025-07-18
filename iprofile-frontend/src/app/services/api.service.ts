@@ -10,18 +10,16 @@ import { Profile } from '../models/profile.model'; // <-- Añade esta línea
 })
 export class ApiService {
   private apiUrl = environment.apiUrl;
-  private listUri = "list";
-  private addUri = "add";
 
   constructor(private http: HttpClient) { }
 
   getProfilesList(): Observable<Profile[]> {
     console.log("getProfilesList()");
-    console.log("calling API with URL:", this.apiUrl+"/"+this.listUri);
+    console.log("calling API with URL:", this.apiUrl+"/");
     try{
-    return this.http.get<any[]>(`${this.apiUrl}/${this.listUri}`);
+      return this.http.get<any[]>(`${this.apiUrl}/`);
     } catch (error) {
-      console.error('Error al listar profiles:', error);
+       console.error('Error al listar profiles:', error);
       throw error;  
     }
   }
@@ -61,21 +59,21 @@ export class ApiService {
     if (!profile || !profile.nickname) {
       throw new Error('Profile or nickname is missing');
     }
-    let url = `${this.apiUrl}/${this.addUri}`;
+    let url = `${this.apiUrl}/`;
     // Asegúrate de que el perfil tenga un nickname único
     console.log("calling API with URL:", url);
     try {
-      console.log('Creating profile:', profile);
-      // Asegúrate de que el perfil tenga un nickname único
-      if (!profile.nickname) {
-        throw new Error('Nickname is required to create a profile');
-      }
-      // Aquí podrías agregar validaciones adicionales si es necesario
-      console.log('Profile to create:', profile);
-      return this.http.post(url, profile);
+        console.log('Creating profile:', profile);
+        // Asegúrate de que el perfil tenga un nickname único
+        if (!profile.nickname) {
+          throw new Error('Nickname is required to create a profile');
+        }
+        // Aquí podrías agregar validaciones adicionales si es necesario
+        console.log('Profile to create:', profile);
+        return this.http.post(url, profile);
 
     } catch (error) {
-      console.error('Error creating profile:', error);
+        console.error('Error creating profile:', error);
       throw error;  
     }  
   }
